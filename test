@@ -1,0 +1,17 @@
+import time
+import pyautogui
+from PIL import ImageGrab
+from openpyxl import Workbook
+import math
+
+time.sleep(1)
+pos = pyautogui.position()
+print(pos)
+screen = ImageGrab.grab()
+mouse = screen.getpixel(pos)
+print(mouse)
+
+print(pyautogui.size())
+# Size(width=1440, height=900)
+
+#(x=240, y=432), (x=238, y=438), (x=229, y=424)
