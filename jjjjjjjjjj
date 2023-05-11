@@ -121,19 +121,17 @@ while 1:
 
     ##################################################################
     elapsed_time = time.time() - start_time
-    vidlen = 60 * 60 # 일반적으로 총 과정이 약 1시간 전후로 걸림, 따라서 한시간 이후부터 진행
-
-    if elapsed_time >= vidlen:
-        checkend = [(676, 761),(676, 762),(676, 763),(676, 764),(676, 765),(676, 766)]
+    checkend = [(676, 761),(676, 762),(676, 763),(676, 764),(676, 765),(676, 766)]
+    if elapsed_time > 5000: 
         for i in checkend:
             col = checkcolor(i)
-            if euclidean_distance(col, (0,0,0)) > 5:
+            if euclidean_distance(col, (63, 148, 215)) < 50:
                 print("끗! 감사합니다" + str(elapsed_time))
                 raise ValueError
 
     pyautogui.press('space')  # 재생 멈춤 풀기
     time.sleep(1)  # 1초 간격으로 측정
     t += 1  # 엑셀에 표기할 시간
-    write_wb.save('C:\\Users\\User\\PycharmProjects\\pythonProject\\micedata_trainedday1.xlsx')
+    write_wb.save('C:\\Users\\User\\PycharmProjects\\pythonProject\\micedata_trainedday4.xlsx')
 # C:\Users\User\PycharmProjects\pythonProject\main.py
 
