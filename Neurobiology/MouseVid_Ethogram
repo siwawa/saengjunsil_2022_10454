@@ -7,19 +7,34 @@ import math
 write_wb = Workbook()
 write_ws = write_wb.active
 
-# 표 기본 구성 만들기
+# 화면을 절반으로 split 해서 왼쪽을 조교님이 주신 동영상, 오른쪽을 파이썬 코드로 만들고 전체 화면을 1440 * 900 해상도로 한 상태에서 시작합니다.  
+# 프로그램을 실행시키면 2초 후 시작합니다. 이전에 커서를 왼쪽 화면(동영상)에 올리고 재생 버튼을 누르고 시작합니다. 
+# 엑셀 파일이 저장되는 위치는 파이썬 프로그램이 저장된 위치(Pycharmprojects)와 같습니다. 
+# 다만 USER name 이 'USER'가 아니면 저장할 위치를 못 찾을 수도 있으니 저장할 파일 위치의 경로를 마지막 코드 줄에 복붙해주세요.   
+
+
+# 출력되는 엑셀 파일 ethogram의 기본 구조 
+###############################################################
 # 시간:            0, 1, 2, 3, 4, ...
 # CS- conditioning        ---       ---       ---     ...
 # CS+ conditioning             ---       ---       ---    ...
 # 먹이 불빛            ---      ---     ---    ...
-# 쥐의 행동
+# 쥐의 행동             fff uuu ddd 
+# "f": 쥐가 Reward Magazine에 있다. 
+# "u": 쥐가 CS- presentation 되었을 때 위쪽에 있다. 
+# "d": 쥐가 CS+ presentation 되었을 때 아래쪽에 있다. 
+###############################################################
+
+# 표 기본 구성 만들기
 write_ws['A1'] = '시간'
 write_ws['A2'] = 'CS- conditioning'  # 위쪽 등
 write_ws['A3'] = 'CS+ conditioning'  # 아래쪽 등
 write_ws['A4'] = '먹이 불빛'
 write_ws['A5'] = '쥐의 행동'
-time.sleep(2) # 플레이된 상태로 커서를 왼쪽 화면에 올리고 시작하기
 
+time.sleep(2) # 플레이된 상태로 커서를 왼쪽 화면에 올리고 시작하기 위한 2초 시간 보장 
+
+# 마우스 포인터를 해당 픽셀로 움직이고, 그 픽셀의 r,g,b값을 받아옵니다. 
 def checkcolor(pos1):
     pyautogui.moveTo(pos1)
     screen = ImageGrab.grab()
@@ -27,7 +42,8 @@ def checkcolor(pos1):
     print(color1)
     return color1
 
-
+ # 정확히 지정된 픽셀의 색깔과 일치하는 픽셀만 hit으로 간주한다면 프로그램의 민감도가 너무 낮아지기 때문에 
+ # "비슷한 정도"를 측정하기 위해 픽셀 두 개의 r,g,b값을 벡터로 간주, 그 차이를 유클리드 거리로 측정했습니다. 
 def euclidean_distance(tuple1, tuple2):
     distance = 0
     for i in range(len(tuple1)):
@@ -38,10 +54,12 @@ def euclidean_distance(tuple1, tuple2):
 start_time = time.time()
 t = 0
 while 1:
-    pyautogui.press('space')  # 잠시 영상 멈춤 시키기
+    pyautogui.press('space')  # 잠시 영상 멈춤 시키기. 
     write_ws.cell(1, t + 2, str(t))
     print(t)
     print("###########################")
+    
+    #CS-, CS- approach를 확인합니다.  
     #################################################################
     checkuplight = [(504, 356), (507, 350), (518, 360)]
     uplight1 = checkcolor(checkuplight[0])
@@ -68,7 +86,8 @@ while 1:
             print("위쪽 등 켜지고 위쪽 쥐 X")
     else:
         print("위쪽 등 안 켜짐")
-
+    
+    #CS+, CS+ approach를 확인합니다. 
     ##################################################################
     checkdownlight = [(506, 509), (519, 501)]
     downlight1 = checkcolor(checkdownlight[0])
@@ -93,6 +112,9 @@ while 1:
             print("아래쪽 등 켜지고 아래쪽 쥐 X")
     else:
         print("아래쪽 등 안 켜짐")
+        
+    # 먹이 presentation(즉 하나의 trial을 나타냄)을 확인합니다. 다만 t=1로 설정하면(1초간 한번 캡쳐)충분히 잡지 못하는 듯 합니다.  
+    # 따라서, 보고서에서는 이를 제외하고 그냥 전체에서 머무른 시간 비율로 측정했는데........ 다음에는 trial로 해야겠습니다.......ㅋㅋ 
     #################################################################
     checkfoodlight = [(240, 432), (229, 445), (238, 438)]
     foodlight1 = checkcolor(checkfoodlight[0])
@@ -107,6 +129,8 @@ while 1:
     else:
         print("먹이 등 안 켜짐")
 
+    # RM approach를 확인합니다. 
+    #################################################################
     checkfoodmice = [(275, 415), (293, 407), (315, 424), (270, 444), (290, 446), (296, 443), (256, 427), (270, 449)]
     f_micecount = 0
     for posj in checkfoodmice:
@@ -119,19 +143,23 @@ while 1:
         print("쥐가 먹이 쪽에 있음")
         write_ws.cell(5, t + 2, 'f')
 
+
+    # 영상이 끝나면 자동 종료 됩니다. 
+    # 영상 길이는 대부분 30분 전후였고 프로그램을 돌리면 약 90분 정도 돌렸기 때문에 5000초가 지났을 때부터 재생 바가 거의 끝으로 갔는지 확인했습니다. 
+    # 끝쪽 재생 바 근처의 픽셀이 파랑색(끝까지 도달)이면 ValueError를 올려서 프로그램을 종료 시켰습니다. 
     ##################################################################
     elapsed_time = time.time() - start_time
     checkend = [(676, 761),(676, 762),(676, 763),(676, 764),(676, 765),(676, 766)]
-    if elapsed_time > 5000: 
+    if elapsed_time > 5000:  # 5000초가 지나면 그때부터 재생 바가 거의 끝으로 갔는지 확인하기! 
         for i in checkend:
             col = checkcolor(i)
             if euclidean_distance(col, (63, 148, 215)) < 50:
-                print("끗! 감사합니다" + str(elapsed_time))
-                raise ValueError
+                print("끗! 감사합니다" + str(elapsed_time))         # elapsed time, 즉 프로그램이 돌아간 시간이 동영상마다 크게 다르면 뭔가 문제가 생긴 것입니다. 
+                raise ValueError 
 
     pyautogui.press('space')  # 재생 멈춤 풀기
     time.sleep(1)  # 1초 간격으로 측정
     t += 1  # 엑셀에 표기할 시간
     write_wb.save('C:\\Users\\User\\PycharmProjects\\pythonProject\\micedata_trainedday4.xlsx')
-# C:\Users\User\PycharmProjects\pythonProject\main.py
+    # USER 이름 다르면 다르게 쓰세요 
 
