@@ -1,3 +1,5 @@
+## 0508 생전실의 추억.. 와! 
+
 import time
 import pyautogui
 from PIL import ImageGrab
