@@ -1,0 +1,89 @@
+import matplotlib.pyplot as plt
+import numpy as np
+from scipy.stats import kruskal, mannwhitneyu
+from scipy.stats import ttest_ind
+from scipy.stats import f_oneway
+
+
+# Add labels and title
+# plt.xlabel('Samples')
+plt.ylabel('Relative GAPDH mRNA level')
+plt.title('mBrain and mBladder')
+
+# Sample data, mBrain
+x = ['Br_mTuj1','Bl_mTuj1', 'Br_mShh','Bl_mShh', 'Br_mCtip2','Bl_mCtip2']
+# 발현량 데이터 - mBrain은 홀수
+y1 = [8902.53, 6711.7, 8172.22]
+y3 = [56.2612, 80.2013, 74.8948]
+y5 = [483.476, 359.684, 714.064]
+
+#발현량 데이터 - mBladder는 짝수
+y2 = [4.9408, 2.6821, 2.3858]
+y4 = [51.4033, 39.9094, 43.7471]
+y6 = [1.2182, 0.7959, 1.0791]
+
+# Calculate mean values
+mean_y1 = np.mean(y1)
+mean_y3 = np.mean(y3)
+mean_y5 = np.mean(y5)
+mean_y2 = np.mean(y2)
+mean_y4 = np.mean(y4)
+mean_y6 = np.mean(y6)
+
+
+# Calculate standard deviation
+std_y1 = np.std(y1)
+std_y3 = np.std(y3)
+std_y5 = np.std(y5)
+std_y2 = np.std(y2)
+std_y4 = np.std(y4)
+std_y6 = np.std(y6)
+
+# Plotting the bar graph with error bars
+colors = ['lightsteelblue','lemonchiffon', 'cornflowerblue','khaki', 'royalblue','darkkhaki']
+
+plt.bar(x, [mean_y1, mean_y2, mean_y3, mean_y4, mean_y5, mean_y6], label='Mean', color=colors, yerr=[std_y1, std_y2, std_y3, std_y4, std_y5, std_y6], capsize=2)
+
+plt.scatter([x[0]] * 3, y1, marker='o', color='black')
+plt.scatter([x[1]] * 3, y2, marker='o', color='black')
+plt.scatter([x[2]] * 3, y3, marker='o', color='black')
+plt.scatter([x[3]] * 3, y4, marker='o', color='black')
+plt.scatter([x[4]] * 3, y5, marker='o', color='black')
+plt.scatter([x[5]] * 3, y6, marker='o', color='black')
+
+# Perform pairwise t-tests
+t_statistic12, p_value12 = ttest_ind(y1, y2)
+t_statistic13, p_value13 = ttest_ind(y2, y4)
+t_statistic23, p_value23 = ttest_ind(y5, y6)
+
+# Display the t-test results
+print("Pairwise t-test:")
+print("y1 vs y2 - t-statistic:", t_statistic12)
+print("y1 vs y2 - p-value:", p_value12)
+print("y2 vs y4 - t-statistic:", t_statistic13)
+print("y2 vs y4 - p-value:", p_value13)
+print("y5 vs y6 - t-statistic:", t_statistic23)
+print("y5 vs y6 - p-value:", p_value23)
+
+# 통계적 유의성 * ** ns 그리기
+if p_value12 < 0.0005:
+    x1, x2 = 0, 1
+    y, h, col = max(mean_y1, mean_y2) + 2000, 100, 'k'
+    plt.plot([x1, x1, x2, x2], [y, y + h, y + h, y], lw=1.5, c=col)
+    plt.text((x1 + x2) * 0.5, y + h, "***", ha='center', va='bottom', color=col)
+
+if p_value23 < 0.05:
+    x1, x2 = 2,3
+    y, h, col = max(mean_y3, mean_y4) + 1000, 100, 'k'
+    plt.plot([x1, x1, x2, x2], [y, y + h, y + h, y], lw=1.5, c=col)
+    plt.text((x1 + x2) * 0.5, y + h, "*", ha='center', va='bottom', color=col)
+
+if p_value13 < 0.0005:
+    x1, x2 = 4,5
+    y, h, col = max(mean_y5, mean_y6) + 1000, 100, 'k'
+    plt.plot([x1, x1, x2, x2], [y, y + h, y + h, y], lw=1.5, c=col)
+    plt.text((x1 + x2) * 0.5, y + h, "***", ha='center', va='bottom', color=col)
+
+# Display the graph
+plt.show()
+
