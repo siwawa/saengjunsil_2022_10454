@@ -1,0 +1,81 @@
+## RT-qPCR 그림그리기, data analysis하는 데 사용했던 코드 
+# RT -qPCR 에서 나오는 relative 발현량을 brain, bladder 별로 막대 그래프를 그리고 (matplotlib)
+# 이들간의 mean에 통계적 차이가 있는지 확인하는 코드 (scipy)
+# -----------------------------------------------------------------------------------------------------------------
+## 원래는 n=3이라 CLT 적용 못시켜서 ANOVA랑 t-test를 못 쓰고  
+## nonparametric인 Krutzcal, mann-whitny U test(Rank sum test)쓰는 게 정배인데 
+## 무슨 이유인지 모?르?겠?는?데 scipy mann-whitny가 뭔가 이상해서(손으로 계산해본 거랑 다르게 나옴)그냥... t-test 썼읍니다..   
+# -----------------------------------------------------------------------------------------------------------------
+
+
+import matplotlib.pyplot as plt
+import numpy as np
+from scipy.stats import kruskal, mannwhitneyu
+from scipy.stats import ttest_ind
+from scipy.stats import f_oneway
+
+
+# Add labels and title
+# plt.xlabel('Samples')
+plt.ylabel('Relative GAPDH mRNA level')
+plt.title('mBrain')
+
+# Sample data, mBrain
+x = ['mTuj1', 'mShh', 'mCtip2']
+# 발현량 데이터 
+y1 = [8902.53, 6711.7, 8172.22]
+y2 = [56.2612, 80.2013, 74.8948]
+y3 = [483.476, 359.684, 714.064]
+
+# Calculate mean values
+mean_y1 = np.mean(y1)
+mean_y2 = np.mean(y2)
+mean_y3 = np.mean(y3)
+
+# Calculate standard deviation
+std_y1 = np.std(y1)
+std_y2 = np.std(y2)
+std_y3 = np.std(y3)
+
+# Plotting the bar graph with error bars
+colors = ['lightsteelblue', 'cornflowerblue', 'royalblue']
+plt.bar(x, [mean_y1, mean_y2, mean_y3], label='Mean', color=colors, yerr=[std_y1, std_y2, std_y3], capsize=2)
+plt.scatter([x[0]] * len(y1), y1, marker='o', color='black')
+plt.scatter([x[1]] * len(y2), y2, marker='o', color='black')
+plt.scatter([x[2]] * len(y3), y3, marker='o', color='black')
+
+# Perform Kruskal-Wallis test
+stat, p_value = kruskal(y1, y2, y3)
+
+# Perform ANOVA test
+f_statistic, p_value = f_oneway(y1, y2, y3)
+
+# Display the ANOVA test results
+print("ANOVA test:")
+print("F-statistic:", f_statistic)
+print("p-value:", p_value)
+
+
+# Perform pairwise t-tests
+t_statistic12, p_value12 = ttest_ind(y1, y2)
+t_statistic13, p_value13 = ttest_ind(y1, y3)
+t_statistic23, p_value23 = ttest_ind(y2, y3)
+
+# Display the t-test results
+print("Pairwise t-test:")
+print("y1 vs y2 - t-statistic:", t_statistic12)
+print("y1 vs y2 - p-value:", p_value12)
+print("y1 vs y3 - t-statistic:", t_statistic13)
+print("y1 vs y3 - p-value:", p_value13)
+print("y2 vs y3 - t-statistic:", t_statistic23)
+print("y2 vs y3 - p-value:", p_value23)
+# 아니 이거 mann - whitny 쓰면 이상해짐 !!!!!!!!!!!!!!!!!!!!!!! (Krutzcal은 괜찮은데... ;^  ;)
+# 몰라 대충 t test에 ANOVA 때려 어차피 차이 개많이나서 상관 없음
+
+# bonferroni
+alpha = 0.05/3
+print("bonferroni corrected alpha =", alpha)
+
+# Display the graph
+plt.show()
+
