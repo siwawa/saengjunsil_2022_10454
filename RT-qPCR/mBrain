@@ -7,7 +7,6 @@
 ## 무슨 이유인지 모?르?겠?는?데 scipy mann-whitny가 뭔가 이상해서(손으로 계산해본 거랑 다르게 나옴)그냥... t-test 썼읍니다..   
 # -----------------------------------------------------------------------------------------------------------------
 
-
 import matplotlib.pyplot as plt
 import numpy as np
 from scipy.stats import kruskal, mannwhitneyu
@@ -22,7 +21,7 @@ plt.title('mBrain')
 
 # Sample data, mBrain
 x = ['mTuj1', 'mShh', 'mCtip2']
-# 발현량 데이터 
+# 발현량 데이터
 y1 = [8902.53, 6711.7, 8172.22]
 y2 = [56.2612, 80.2013, 74.8948]
 y3 = [483.476, 359.684, 714.064]
@@ -74,8 +73,32 @@ print("y2 vs y3 - p-value:", p_value23)
 
 # bonferroni
 alpha = 0.05/3
+alpha2 = 0.005/3
 print("bonferroni corrected alpha =", alpha)
+print("bonferroni corrected alpha2 =", alpha2)
+
+# Add statistical annotations
+# Add a horizontal line and annotation
+if p_value12 < alpha2:
+    x1, x2 = 0, 1
+    y, h, col = max(mean_y1, mean_y2, mean_y3) + 1500, 100, 'k'
+    plt.plot([x1, x1, x2, x2], [y, y + h, y + h, y], lw=1.5, c=col)
+    plt.text((x1 + x2) * 0.5, y + h, "**", ha='center', va='bottom', color=col)
+
+if p_value23 < alpha:
+    x1, x2 = 1, 2
+    y, h, col = max(mean_y1, mean_y2, mean_y3) + 1900, 100, 'k'
+    plt.plot([x1, x1, x2, x2], [y, y + h, y + h, y], lw=1.5, c=col)
+    plt.text((x1 + x2) * 0.5, y + h, "*", ha='center', va='bottom', color=col)
+
+if p_value13 < alpha2:
+    x1, x2 = 0, 2
+    y, h, col = max(mean_y1, mean_y2, mean_y3) + 2400, 100, 'k'
+    plt.plot([x1, x1, x2, x2], [y, y + h, y + h, y], lw=1.5, c=col)
+    plt.text((x1 + x2) * 0.5, y + h, "**", ha='center', va='bottom', color=col)
 
 # Display the graph
 plt.show()
+
+
 
