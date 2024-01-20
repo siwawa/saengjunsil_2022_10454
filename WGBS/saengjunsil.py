@@ -10,7 +10,7 @@ data = pd.read_excel('C:\data\saengjunsil_data.xlsx', sheet_name = 'CHH', engine
 independent_vars = data[['growth', 'ecotype']]
 dependent_vars = data[['CHH', 'CG', 'CHG']]
 
-# 등분산성 검증
+# 등분산성 검증 #<- 왜한거야??
 levene_test = levene(dependent_vars['줄넘기 횟수'], dependent_vars['악력'], dependent_vars['오래달리기 횟수'])
 print('Levene test: ', levene_test)
 
